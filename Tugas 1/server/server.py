@@ -4,7 +4,8 @@ import sys
 import os
 
 # define server address, create socket, bind, and listen
-server_address = ('192.168.100.186', 5000)
+# server_address = ('192.168.100.186', 5000)
+server_address = ('192.168.143.225', 5000)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind(server_address)
