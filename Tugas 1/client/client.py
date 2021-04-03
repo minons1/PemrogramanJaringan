@@ -6,7 +6,7 @@ failed_msg = (bytes('File not found', 'utf-8'))
 
 # create socket and connect to server
 # server_address = ('192.168.100.186', 5000)
-server_address = ('192.168.143.225', 5000)
+server_address = ('192.168.43.225', 5000)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect(server_address)
 
