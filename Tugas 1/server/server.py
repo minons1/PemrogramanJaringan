@@ -37,20 +37,19 @@ try:
                     print(sock.getpeername(), 'request', filename)
                     # membuka dan mengirim file
                     try:
-                        file = open(filename, 'rb')
-                        # mengirimkan message header ke client
-                        filesize = str(os.path.getsize(filename))
-                        message_header = "file-name: "+filename+",\nfile-size: "+filesize+",\n\n\n"
-                        sock.send(bytes(message_header,'utf-8'))
-                        # membaca dan mengirimkan isi file ke client
-                        readfile = True
-                        while (readfile):
-                            readfile = file.read(1024)
-                            sock.send(readfile)
-                        
-                        # file sudah berhasil dikirim
-                        file.close()
-                        print ('File telah dikirim ke', sock.getpeername())
+                        with open("dataset/"+filename, 'rb') as file:
+                            # mengirimkan message header ke client
+                            filesize = str(os.path.getsize("dataset/"+filename))
+                            message_header = "file-name: "+filename+",\nfile-size: "+filesize+",\n\n\n"
+                            sock.send(bytes(message_header,'utf-8'))
+                            # membaca dan mengirimkan isi file ke client
+                            readfile = True
+                            while (readfile):
+                                readfile = file.read(1024)
+                                sock.send(readfile)
+                            
+                            # file sudah berhasil dikirim
+                            print ('File telah dikirim ke', sock.getpeername())
 
                     # menangkap error ketika membuka file atau yang lainnya
                     except OSError:

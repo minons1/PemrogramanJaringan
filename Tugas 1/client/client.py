@@ -23,6 +23,7 @@ try:
 
         # melakukan parsing untuk mendapatkan message header
         message_header = recv_data.split('\n'.encode(),4)
+        
         if len(message_header) > 3:
             for i in range (4):
                 print(message_header[i])
@@ -30,26 +31,27 @@ try:
         # jika file tidak ada atau error, maka koneksi akan ditutup
         elif message_header[0].decode('utf-8') == 'Error':
             print("Terjadi kelasalahan pada input ataupun file")
-            break
+            continue
         
         # membuat file dan mengisi data kedalam file
         with open(filename, 'wb') as file:
+            # Panjang pesan untuk membatasi loop recv sesuai ukuran file
+            msg_len = message_header[1].decode('utf-8').split(" ")
+            file_len = (int(msg_len[1][:-1])//1024) + 1
             print ('File dibuat')
+
             # mengirimkan file yang masuk ke recv_data (untuk memenuhi slot 1024 bytes sebelum
             # masuk ke variabel selanjutnya (data))
             file.write(message_header[4])
-            while True:
+            while file_len:
                 print('Menerima data...')
                 data = client_socket.recv(1024)
-                if not data:
-                    break
                 file.write(data)
+                file_len-=1
 
-        ## CODE BELUM DAPAT MENDETEKSI KAPAN DATA TELAH SEPENUHNYA DITERIMA
         ## INTERRUPT DENGAN KEYBOARD UNTUK MENGHENTIKAN PROSES
 
         # file telah diterima
-        file.close()
         print("File telah diterima\n")
 
 except KeyboardInterrupt:
