@@ -2,6 +2,7 @@ import socket
 import select
 import sys
 import os
+import time
 
 # define server address, create socket, bind, and listen
 # server_address = ('192.168.100.186', 5000)
@@ -47,6 +48,9 @@ try:
                             while (readfile):
                                 readfile = file.read(1024)
                                 sock.send(readfile)
+                                # Sleep agar tidak ada loss package yang dikirim
+                                # Tanpa sleep terlalu cepat(mungkin masalah hardware, bisa dicoba di device lain)
+                                time.sleep(0.5)
                             
                             # file sudah berhasil dikirim
                             print ('File telah dikirim ke', sock.getpeername())
