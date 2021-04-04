@@ -37,12 +37,15 @@ try:
         with open(filename, 'wb') as file:
             # Panjang pesan untuk membatasi loop recv sesuai ukuran file
             msg_len = message_header[1].decode('utf-8').split(" ")
-            file_len = (int(msg_len[1][:-1])//1024) + 1
+            file_len = (int(msg_len[1][:-1])//1024)
             print ('File dibuat')
 
             # mengirimkan file yang masuk ke recv_data (untuk memenuhi slot 1024 bytes sebelum
             # masuk ke variabel selanjutnya (data))
             file.write(message_header[4])
+            print('Menerima data...')
+            data = client_socket.recv(1024)
+            file.write(data)
             while file_len:
                 print('Menerima data...')
                 data = client_socket.recv(1024)
