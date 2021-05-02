@@ -1,4 +1,5 @@
 import socket
+from bs4 import BeautifulSoup
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('classroom.its.ac.id', 80)
@@ -15,8 +16,14 @@ while True:
     response += received.decode('utf-8')
 
 responses = response.rsplit('\r\n',1)
-title = responses[1].split('\n')
-print(title[5])
+body = responses[1]
+
+soup = BeautifulSoup(body, 'html.parser')
+print(soup.title.string)
+
+
+# title = responses[1].split('\n')
+# print(title)
 
 # print(response)
 client_socket.close()
