@@ -16,9 +16,9 @@ while True:
     response += received.decode('utf-8')
 
 responses = response.rsplit('\r\n',1)
-body = responses[1]
+content = responses[1]
 
-soup = BeautifulSoup(body, 'html.parser')
+soup = BeautifulSoup(content, 'html.parser')
 print(soup.title.string)
 
 

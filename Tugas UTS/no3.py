@@ -15,7 +15,7 @@ while True:
     response += received.decode('utf-8')
 
 headers = response.split('\r\n', 1)
-versi = headers[0].rsplit(' ',1)
+versi = headers[0].split(' ',1)
 print(versi[0])
 
 # print(response)
