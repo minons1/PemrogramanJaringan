@@ -1,7 +1,8 @@
+import os
 import socket
 import select
 import sys
-import configparser
+from configparser import ConfigParser
 
 def get_index(sock, response_headers, response_data) :
     f = open('index.html', 'r')
@@ -14,10 +15,13 @@ def get_index(sock, response_headers, response_data) :
 
     sock.sendall(response_header.encode('utf-8') + response_data.encode('utf-8'))
 
-configParser = configparser.RawConfigParser()   
-configFilePath = r'httpserver.conf'
-configParser.read(configFilePath)
-PORT = int(configParser.get('PORT', 'port3'))
+
+thisfolder = os.path.dirname(os.path.abspath(__file__))
+filepath = os.path.join(thisfolder, 'httpserver.conf')
+
+parser = ConfigParser()
+parser.read(filepath)
+PORT = int(parser.get('PORT', 'port3'))
 
 server_address = ('127.0.0.1', PORT)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
