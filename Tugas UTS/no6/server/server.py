@@ -10,7 +10,7 @@ from urllib.parse import unquote
 
 class Server:
     def __init__(self,port):
-        self.host = '192.168.43.225'
+        self.host = '192.168.100.219'
         self.port = port
         self.backlog = 5
         self.size = 1024
@@ -97,7 +97,6 @@ class Client(threading.Thread):
         while running:
             data = self.client.recv(self.size)
             if data:
-                print("masuk")
                 data = data.decode('utf-8')
                 print(data)
                 

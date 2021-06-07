@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 
 class Client:
     def __init__(self):
-        self.host = '192.168.43.225'
-        self.port = 12345
+        self.host = '192.168.100.219'
+        self.port = 5000
         self.client = None
         self.size = 1024
 
