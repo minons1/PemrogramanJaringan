@@ -17,5 +17,5 @@ class Message():
 COMMAND_AVAILABLE = {
       "!help" : "help",
       "!exit" : "exit messanger",
-      "!send" : "send message\n\t-f [name] for private message\n\t-b for broadcast message"
+      "!send" : "send message\n\t-f [name] for private message\n\t-b for broadcast message\n\t-a [name] for add friends\n\t-ft [name] [filename] for send file to added friend"
 }

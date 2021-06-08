@@ -24,12 +24,20 @@ class Client:
         self.client.close()
         sys.exit(0)
 
+    # Function for send msg to server 
+    def send_msg(self,receiver,message,filename,attachment):
+        req = Message(self.client.getsockname(),receiver,message,filename,attachment)
+        req = pickle.dumps(req)
+        self.client.send(req)
+
+    # Thread function for handle recv msg from server
     def recv_msg(self):
         while True:
             res = self.client.recv(self.size)
             if(len(res)==0):
                 break
             else:
+                # TO-DO handle recv msg with file attachment
                 res = pickle.loads(res)
                 if(type(res.message) == dict):
                     print("[{}] : list command available".format(res.sender))
@@ -40,10 +48,7 @@ class Client:
                     if(res.message == "bye 0/"):
                         break
     
-    def send_msg(self,receiver,message,filename,attachment):
-        req = Message(self.client.getsockname(),receiver,message,filename,attachment)
-        req = pickle.dumps(req)
-        self.client.send(req)
+    
 
     def run(self):
         self.open_socket()
@@ -72,8 +77,8 @@ class Client:
                         # to-do add friend
                         pass
 
-                    elif(pesan[1] == "-fp"):
-                        #to-do transfer file
+                    elif(pesan[1] == "-ft"):
+                        #to-do file transfer
                         pass
 
                 else:
