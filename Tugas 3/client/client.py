@@ -8,10 +8,10 @@ from messageclass import Message
 class Client:
     def __init__(self):
         # self.host = '192.168.100.219'
-        self.host = '192.168.43.225'
+        self.host = '127.0.0.1'
         self.port = 5000
         self.client = None
-        self.size = 65535
+        self.size = 65569
         self.thread = threading.Thread(target=self.recv_msg)
 
     def open_socket(self):
@@ -45,10 +45,27 @@ class Client:
                         print(k," : ",v)
                 else:
                     print("[{}] : {}".format(res.sender,res.message))
-                    if(res.message == "bye 0/"):
+                    if (res.message == "file transfer"):
+                        self.save_file(res.filename,res.attachment)
+
+                    elif(res.message == "bye 0/"):
                         break
+                    
     
+    def get_file(self, filename):
+        f = open('../dataset/'+filename, 'rb')
+        data = f.read()
+        f.close()
+        # print(data)
+        filedata = pickle.dumps(data)
+
+        return filedata
     
+    def save_file(self, filename, filedata):
+        f =  open('./assets/'+filename,'wb')
+        f.write(pickle.loads(filedata))
+        f.close()
+        print ("File " + filename + " has been saved")
 
     def run(self):
         self.open_socket()
@@ -65,21 +82,28 @@ class Client:
 
                 elif(pesan[0] == "!help"):
                     self.send_msg("server",pesan,None,None)
+                
+                elif(pesan[0] == "!addfriend"):
+                    self.send_msg("server",pesan,None,None)
+                
+                elif(pesan[0] == "!friendlist"):
+                    self.send_msg("server",pesan,None,None)
 
                 elif(pesan[0] == "!send"):
                     if(pesan[1] == "-b"):
                         self.send_msg("broadcast",pesan,None,None)
 
                     elif(pesan[1] == "-f"):
-                        self.send_msg(pesan[2],pesan,None,None)
+                        self.send_msg("pesan[2]",pesan,None,None)
 
                     elif(pesan[1] == "-a"):
-                        # to-do add friend
-                        pass
-
+                        self.send_msg("friends",pesan,None,None)
+                
                     elif(pesan[1] == "-ft"):
-                        #to-do file transfer
-                        pass
+                        filename = pesan[3]
+                        filedata = self.get_file(filename)
+                        self.send_msg("friends",pesan,filename,filedata)
+                        print("File " + filename + " has been sent to server")
 
                 else:
                     self.send_msg("server",pesan,None,None)

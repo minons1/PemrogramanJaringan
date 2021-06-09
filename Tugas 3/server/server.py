@@ -6,16 +6,26 @@ import pickle
 from configparser import ConfigParser
 
 from messageclass import Message,COMMAND_AVAILABLE
+class Profile:
+    def __init__(self, sock, uname):
+        self.username = uname
+        self.socket = sock
+        self.friend = {}
+
+    def addFriend(self, sock, uname):
+        self.friend[sock] = uname
 
 class Server:
     def __init__(self,port):
         # self.host = '192.168.100.219'
-        self.host = '192.168.43.225'
+        # self.host = '192.168.43.225'
+        self.host = '127.0.0.1'
         self.port = port
-        self.size = 65535
+        self.size = 65569
         self.server = None
         self.threads = []
         self.clients = {}
+        self.profiles = {}
 
     def open_socket(self):        
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,8 +53,13 @@ class Server:
         # Tuple for save this client socket and username
         this_client = (client_socket,username)
 
+        # Add this client to profile list
+        self.profiles[username] = Profile(client_socket, username)
+
         while True:
+
             req = client_socket.recv(self.size)
+
             if req:
                 req = pickle.loads(req)
 
@@ -60,7 +75,34 @@ class Server:
                     
                     elif(req.message[0] == "!help"):
                         self.send_msg("server",this_client,COMMAND_AVAILABLE,None,None)
-                    
+
+                    elif(req.message[0] == "!friendlist"):
+                        friendlist = []
+                        for client_sock,client_uname in self.profiles[username].friend.items():
+                            friendlist.append(client_uname)
+                        
+                        if len(friendlist) != 0:
+                            self.send_msg("server",this_client,friendlist,None,None)
+                        
+                        else :
+                            self.send_msg("server",this_client,"You have no friends in your friendlist",None,None)
+
+                    elif(req.message[0] == "!addfriend"):
+                        name = req.message[1]
+                        value = 0
+                        # Check if friend's name that user want to add is exist
+                        for uname, user in self.profiles.items():
+                            if uname == name:
+                                self.profiles[username].addFriend(user.socket, user.username)
+                                self.send_msg("server",this_client, name + " is successfully added as your friend",None,None)
+
+                                self.profiles[user.username].addFriend(this_client, username)
+                                # self.send_msg("server",user.socket, username + " is successfully added you as his friend",None,None)
+                                value = 1
+                                break
+                        
+                        if value == 0 :
+                            print("There is no profile with username : " + name)
                     
                     elif(req.message[0] == "!send"):
                         if(req.message[1] == "-b"):
@@ -80,14 +122,29 @@ class Server:
                                 self.send_msg(this_client[1],(keys[0],req.message[2]),req.message[3],None,None)
                         
                         elif(req.message[1] == "-a"):
-                            # to-do handle add friend
-                            pass
+
+                            for client_sock,client_uname in self.profiles[username].friend.items():
+                                pesan = req.message[2]
+                                if(len(req.message)==4):
+                                    pesan += " "+req.message[3]
+                                self.send_msg("FRIENDS/"+username,(client_sock,client_uname),pesan,None,None)
 
                         elif(req.message[1] == "-ft"):
-                            # to-do handle file transfer
-                            pass
+                            value = 0
+                            for client_sock,client_uname in self.profiles[username].friend.items():
+                                if(client_uname == req.message[2]):
+                                    pesan = "file transfer"
+                                    filename = req.message[3]
+                                    data = req.attachment
+                                    # print(req.attachment)
+                                    self.send_msg("FRIENDS/"+username,(client_sock,client_uname),pesan,filename,data)
+                                    value = 1
+                            
+                            if value == 0:
+                                self.send_msg("server",this_client,req.message[2] + " is not exist in your friendlist",None,None)
 
                 else:
+                    print(req.message)
                     self.send_msg("server",this_client,"command not available",None,None)
                     
             else:
