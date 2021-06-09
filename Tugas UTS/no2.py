@@ -15,7 +15,9 @@ while True:
     response += received.decode('utf-8')
 
 headers = response.split('\r\n', 2)
-print(headers[1])
+hasil = headers[1].split(' ')
+print(hasil[1])
+# print(headers[1])
 
 # print(response)
 client_socket.close()
