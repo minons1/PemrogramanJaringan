@@ -11,7 +11,7 @@ class Client:
         self.host = '127.0.0.1'
         self.port = 5000
         self.client = None
-        self.size = 65569
+        self.size = 65536
         self.thread = threading.Thread(target=self.recv_msg)
 
     def open_socket(self):
@@ -33,7 +33,15 @@ class Client:
     # Thread function for handle recv msg from server
     def recv_msg(self):
         while True:
-            res = self.client.recv(self.size)
+            res = b''
+            while True:
+                packet = self.client.recv(self.size)
+                res += packet
+
+                if len(packet) < self.size - 1:
+                    break
+
+
             if(len(res)==0):
                 break
             else:
@@ -53,10 +61,15 @@ class Client:
                     
     
     def get_file(self, filename):
-        f = open('../dataset/'+filename, 'rb')
-        data = f.read()
-        f.close()
-        # print(data)
+        try: 
+            f = open('../dataset/'+filename, 'rb')
+            data = f.read()
+            f.close()
+
+        except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
+            print ('file error')
+            return -1
+            
         filedata = pickle.dumps(data)
 
         return filedata
@@ -100,15 +113,19 @@ class Client:
                         self.send_msg("friends",pesan,None,None)
                 
                     elif(pesan[1] == "-ft"):
-                        filename = pesan[3]
-                        filedata = self.get_file(filename)
-                        self.send_msg("friends",pesan,filename,filedata)
-                        print("File " + filename + " has been sent to server")
-
+                        if len(pesan) > 3:
+                            filename = pesan[3]
+                            filedata = self.get_file(filename)
+                            if(filedata != -1):
+                                self.send_msg("friends",pesan,filename,filedata)
+                                print("File " + filename + " has been sent to server")
+                            else:
+                                continue
+                        else:
+                            print("Please input filename")
                 else:
                     self.send_msg("server",pesan,None,None)
                 
-       
         except KeyboardInterrupt:
             self.close_socket()
 
