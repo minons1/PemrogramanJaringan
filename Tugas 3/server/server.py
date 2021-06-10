@@ -39,6 +39,17 @@ class Server:
         res = Message(sender,receiver[1],message,filename,attachment)
         res = pickle.dumps(res)
         receiver[0].send(res)
+
+    # delete user's friendlist (all)
+    def delAllFriend(self, username, this_client):
+        temp = dict(self.profiles[username].friend)
+        for friend_sock,friend_uname in temp.items():
+            del self.profiles[friend_uname].friend[this_client]
+
+            del self.profiles[username].friend[friend_sock]
+            self.send_msg("server",(friend_sock,friend_uname), username + " has left from the server. This user has been deleted from your friendlist",None,None)
+
+        print(username + "'s friendlist has been deleted")
     
     # Thread function thread for handle client send & recv 
     def run_client(self,client_socket,client_address):
@@ -73,6 +84,7 @@ class Server:
 
                     # Handle if client disconnect from server
                     if(req.message[0] == "!exit"):
+                        self.delAllFriend(username, client_socket)
                         print(">> ",client_address, username, "left the server!")
                         self.send_msg("server",this_client,"bye 0/",None,None)
                         self.clients.pop(client_socket)
@@ -93,8 +105,8 @@ class Server:
                             self.send_msg("server",this_client,"You have no friends in your friendlist",None,None)
 
                     elif(req.message[0] == "!addfriend"):
-                        name = req.message[1]
                         if len(req.message) > 1:
+                            name = req.message[1]
                             value = 0
                             # Check if friend's name that user want to add is exist
                             for uname, user in self.profiles.items():
@@ -102,15 +114,15 @@ class Server:
                                     self.profiles[username].addFriend(user.socket, user.username)
                                     self.send_msg("server",this_client, name + " is successfully added as your friend",None,None)
 
-                                    self.profiles[user.username].addFriend(this_client, username)
-                                    # self.send_msg("server",user.socket, username + " is successfully added you as his friend",None,None)
+                                    self.profiles[user.username].addFriend(client_socket, username)
+                                    self.send_msg("server",(user.socket,user.username), username + " is successfully added as your friend",None,None)
                                     value = 1
                                     break
                             
                             if value == 0 :
                                 self.send_msg("server",this_client,"There is no profile with username : " + name,None,None)
                         else:
-                            self.send_msg("server",this_client,"Please input the username" + name,None,None)
+                            self.send_msg("server",this_client,"Please input the username",None,None)
                     
                     elif(req.message[0] == "!send"):
                         if(req.message[1] == "-b"):
