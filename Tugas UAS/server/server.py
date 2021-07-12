@@ -37,6 +37,7 @@ class Profile:
         self.socket = sock
         self.friend = {}
         self.room = -1
+        self.status = 0
 
     def addFriend(self, sock, uname):
         self.friend[sock] = uname
@@ -117,10 +118,12 @@ class Server:
             # define player 2
             player2 = (players_socket[1],players_name[1])
 
-            # ask ready
-            self.send_msg("server",player1,"Input 'ready' to play or 'leave' to leave the room",None,None)
+            # set player status to in game
+            self.profiles[players_name[0]].status = 1
+            self.profiles[players_name[1]].status = 1
 
-            # recv ready
+            # ask player1 to ready
+            self.send_msg("server",player1,"Input 'ready' to play or 'leave' to leave the room",None,None)
             while True:
                 msg1 = recv_msg(players_socket[0])
 
@@ -138,6 +141,7 @@ class Server:
                 else:
                     self.send_msg("server",player1,"Room : Wrong input!",None,None)
 
+            # ask player2 to ready
             self.send_msg("server",player2,"Input 'ready' to play or 'leave' to leave the room",None,None)
             while True:
                 msg2 = recv_msg(players_socket[1])
@@ -161,6 +165,8 @@ class Server:
                 self.gameRoom(index)
 
             else:
+                self.profiles[players_name[0]].status = 0
+                self.profiles[players_name[1]].status = 0
                 return 0
         
         else:
@@ -214,7 +220,7 @@ class Server:
         def player1_turn():
             while True :
                 time.sleep(1)
-                self.send_msg("server",player1,"Your turn",None,None)
+                self.send_msg("server",player1,"Your turn, choose 'right' or 'left!'",None,None)
                 self.send_msg("server",player2,"Player1 turn",None,None)
                 message = recv_msg_game(player1_socket)
 
@@ -246,7 +252,7 @@ class Server:
         def player2_turn():
             while True :
                 time.sleep(1)
-                self.send_msg("server",player2,"Your turn",None,None)
+                self.send_msg("server",player2,"Your turn, choose 'right' or 'left!",None,None)
                 self.send_msg("server",player1,"Player2 turn",None,None)
                 message = recv_msg_game(player2_socket)
 
@@ -326,8 +332,10 @@ class Server:
             self.send_msg("server",player2,"You are leaving the room",None,None)
             self.rooms[index].removePlayer(player1_socket)
             self.profiles[player1_name].room = -1
+            self.profiles[player1_name].status = 0
             self.rooms[index].removePlayer(player2_socket)
             self.profiles[player2_name].room = -1
+            self.profiles[player2_name].status = 0
 
             print ("Game finished")
             game_mode = 0
@@ -356,6 +364,8 @@ class Server:
         self.createRoom()
 
         while True:
+            if self.profiles[username].status != 0:
+                time.sleep(2)
             print("recv from main")
             req = b''
             while True:
